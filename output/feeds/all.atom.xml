@@ -1,0 +1,415 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom"><title>hackrole's home</title><link href="http://www.hackrole.com/" rel="alternate"></link><link href="http://www.hackrole.com/feeds/all.atom.xml" rel="self"></link><id>http://www.hackrole.com/</id><updated>2014-07-22T00:00:00+02:00</updated><entry><title>程序员的荣耀</title><link href="http://www.hackrole.com/cheng-xu-yuan-de-rong-yao.html" rel="alternate"></link><updated>2014-07-22T00:00:00+02:00</updated><author><name>hackrole</name></author><id>tag:www.hackrole.com,2014-07-22:cheng-xu-yuan-de-rong-yao.html</id><summary type="html">&lt;div class="section" id="id2"&gt;
+&lt;h2&gt;起因&lt;/h2&gt;
+&lt;p&gt;今天又楞是在qq群里跟人争论不休，最好得了个sb的称号悻悻而逃。只是后面突然见到这样几句话语。
+不得不说漏见已慰几.&lt;/p&gt;
+&lt;img alt="image 01" class="big-image" src="/images/dev_pride_01.jpg" /&gt;
+&lt;img alt="image 02" src="/images/dev_pride_02.jpeg" /&gt;
+&lt;/div&gt;
+&lt;div class="section" id="id3"&gt;
+&lt;h2&gt;荣耀之身&lt;/h2&gt;
+&lt;/div&gt;
+</summary><category term="coder"></category><category term="jog"></category><category term="thinking"></category></entry><entry><title>html5与原声app比较</title><link href="http://www.hackrole.com/html5yu-yuan-sheng-appbi-jiao.html" rel="alternate"></link><updated>2014-06-18T00:00:00+02:00</updated><author><name>hackrole</name></author><id>tag:www.hackrole.com,2014-06-18:html5yu-yuan-sheng-appbi-jiao.html</id><summary type="html">&lt;p&gt;移动开发还是html5,&lt;/p&gt;
+</summary><category term="移动开发"></category><category term="html5"></category></entry><entry><title>布尔还是整型状态</title><link href="http://www.hackrole.com/bu-er-huan-shi-zheng-xing-zhuang-tai.html" rel="alternate"></link><updated>2014-06-09T00:00:00+02:00</updated><author><name>hackrole</name></author><id>tag:www.hackrole.com,2014-06-09:bu-er-huan-shi-zheng-xing-zhuang-tai.html</id><summary type="html">&lt;div class="section" id="id2"&gt;
+&lt;h2&gt;写在前面的话&lt;/h2&gt;
+&lt;p&gt;做后端开发3年了，后端的大头说白的就是一个数据库。所以每天都在与数据库打交道。
+从业之处，那管你什么表结构，需要功能就加表加字段，要性能就做冗余或是缓存。
+也算勉强混过了几个年头。表建的太多了，就会发现很多的表都有相似的结构，也有很多相似的考量方案。&lt;/p&gt;
+&lt;p&gt;其中一个比较常见的就是在选择数据状态位时，是选择多个bool_if值控制还是一个int_status值。&lt;/p&gt;
+&lt;p&gt;本文大量使用了 &lt;strong&gt;表&lt;/strong&gt; 这一词,此处不单单指SQL数据库. nosql数据库,甚至是内存对象，类对象也应该有相似的处理。&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="id3"&gt;
+&lt;h2&gt;布尔还是整型?&lt;/h2&gt;
+&lt;p&gt;布尔和整型status的区别, &lt;strong&gt;就是布尔只能是true/false,而整形一般可以是任意一个整数，当然没人会整出那么多状态的结构，一般都会再3-5,或是5-10之间&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;布尔例子:&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+if_live = BooleanField(help_text=u&amp;quot;是否还没死&amp;quot;)
+if_gold = BooleanField(help_text=u&amp;quot;是否是金子做的&amp;quot;)
+&lt;/pre&gt;
+&lt;p&gt;整形例子:&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+CHOICES = {
+    'dead': -1, # 禁用
+    'normal': 0, # 正常
+    'closed': 1, # 关闭
+
+}
+status = IntField(choices=CHOICES, help_text=u&amp;quot;状态&amp;quot;)
+&lt;/pre&gt;
+&lt;p&gt;从上面可以看出两者最大的区别在于:&lt;/p&gt;
+&lt;ol class="arabic simple"&gt;
+&lt;li&gt;互斥性&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;整形状态值具有互斥性(你只能设置一个状态值).
+而多个布尔型之间就没这种特性，比如:&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+# bool
+if_finish = BooleanField(help_text=u&amp;quot;是否是正式用户&amp;quot;)
+if_gold = BooleanField(help_text=u&amp;quot;是否是黄金用户&amp;quot;)
+
+# int
+CHOICES = {
+    'not_finish': -1,  # 非正式用户
+    'finish': 0,  # 正式用户
+    'gold': 1,  # 黄金用户
+}
+user_status = IntField(choices=CHOICES, help_text=u&amp;quot;用户状态&amp;quot;)
+&lt;/pre&gt;
+&lt;p&gt;用户当然必须是正式用户才能是黄金用户.&lt;/p&gt;
+&lt;p&gt;但是bool的例子中数据结构中确实有可能使一个用户在成为正式用户前，变身黄金用户。
+当然你可以通过代码的方式来控制这种逻辑，随着而来的就是代码的硬逻辑和维护负担。&lt;/p&gt;
+&lt;p&gt;反观int的例子就很好的解决了这个问题。&lt;/p&gt;
+&lt;ol class="arabic simple" start="2"&gt;
+&lt;li&gt;多状态的记忆性&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;整形状态值一旦被重新设置后就会丢失之前的状态。
+而多个布尔值的状态变化不会出现这种情况, 比如:&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+# bool
+if_close = BooleanField(help_text=u&amp;quot;是否被禁用&amp;quot;)
+if_gold = BooleanField(help_text=u&amp;quot;是否是黄金用户&amp;quot;)
+
+# int
+CHOICES = {
+    'closed': -1,  # 禁用
+    'normal': 0,  # 普通用户
+    'gold': 1,  # 黄金用户
+}
+user_status = IntField(choices=CHOICES, help_text=u&amp;quot;用户状态&amp;quot;)
+&lt;/pre&gt;
+&lt;p&gt;假若现在临时禁用一个用户，之后有取消禁用。
+bool的例子没有问题，设置下is_close就好了。
+int的例子有个问题，没法判断一个被禁用的用户之前是普通用户还是黄金用户, 之前的状态丢失了。&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="id4"&gt;
+&lt;h2&gt;实践策略&lt;/h2&gt;
+&lt;p&gt;再设计表结构的状态位时，基本的考量也就是考虑在状态互斥和记忆性。
+1) 允许一个非正式用户成为黄金用户，当然不能算一个好的数据结构设计。
+2) 一旦禁用就不能返回以前状态当然更加糟糕。&lt;/p&gt;
+&lt;p&gt;除此之外，还有一些其他的方面需要考虑。
+1) bool型字段应该在逻辑允许的情况下尽量少，但是前提是满足逻辑以及可以考虑的扩展的要求。&lt;/p&gt;
+&lt;dl class="docutils"&gt;
+&lt;dt&gt;原因很简单, 当一个表结构中bool字段太多，那你可能就会有下面这样查询语句的对比::&lt;/dt&gt;
+&lt;dd&gt;&lt;p class="first"&gt;# bool
+user.objects(is_close=False, is_gold=True, is_finish=True,....)&lt;/p&gt;
+&lt;p class="last"&gt;# int
+user.objects(status=CHOICES['gold'])&lt;/p&gt;
+&lt;/dd&gt;
+&lt;/dl&gt;
+&lt;p&gt;选择一目了然.&lt;/p&gt;
+&lt;ol class="arabic" start="2"&gt;
+&lt;li&gt;&lt;p class="first"&gt;int型字段应该做好顺序的设置，这种顺序有时会发挥很好的副作用:&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+# int 1
+CHOICES = {
+    'normal': -2,  # 普通用户
+    'closed': -1,  # 禁用
+    'gold': 1,  # 黄金用户
+}
+status = IntField(choices=CHOICES, help_text=u&amp;quot;用户状态&amp;quot;)
+
+# int 2
+CHOICES = {
+    'closed': -1,  # 禁用
+    'normal': 0,  # 普通用户
+    'gold': 1,  # 黄金用户
+}
+status = IntField(choices=CHOICES, help_text=u&amp;quot;用户状态&amp;quot;)
+
+# 查询正常或黄金用户
+# int 1
+user.objects(status__in=[CHOICES['normal'], CHOICES['gold']])
+# int 2
+user.objects(status__gte=CHOICES['normal'])
+&lt;/pre&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;3) 设计即多选一
+一般的策略是一个int_status配合几个bool型做状态处理。
+但是很多时候,尤其是状态位较多的情况，会出现的一个问题是如何做int型和bool型间做平衡。
+应该设置几个bool型，那些应该放到bool型中，那些应该放到int型中，这些考量当然必须首先满足逻辑要求。
+之后如果仍有多个选项，则可能要靠个人的经验和品味。&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="id5"&gt;
+&lt;h2&gt;扩展思考&lt;/h2&gt;
+&lt;div class="section" id="bits-string"&gt;
+&lt;h3&gt;bits/string状态位。&lt;/h3&gt;
+&lt;dl class="docutils"&gt;
+&lt;dt&gt;相信不少朋友碰到过这样的设计::&lt;/dt&gt;
+&lt;dd&gt;# string
+status = &amp;quot;11&amp;quot; # 第一位if_close, 第二位if_gold
+# bits
+status = 4 # 2进制位控制，（00, 01, 11, 10)&lt;/dd&gt;
+&lt;/dl&gt;
+&lt;p&gt;现在在楼主看来这样的设计很糟糕.&lt;/p&gt;
+&lt;ol class="arabic simple"&gt;
+&lt;li&gt;这中设计根本上就是无非把多个bool位合并成一个，带来的结果
+1) 设计结构可读性差。
+2) 可扩展和可维护性差(多状态被硬编码在一起)。
+3) 查询不便，必须手动拼接status值，甚至做位运算。
+4) 要说多省存储空间吧，也不见得。&lt;/li&gt;
+&lt;li&gt;延伸的思考就是int型某种意义上来说也是多个bool合并的结构，但是很大的差别在于, 不会对int值做某种硬性规定.&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;一方面将int与原先的多个bool之间做了解耦合，解决了扩展性和可维护的问题.
+另一方面，允许设计者对int值做自己的选择,一定程度上能解决可读性，和查询不变的问题。
+存储的问题是最次要的问题，甚至不应该考虑.因为太便宜了。&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="id6"&gt;
+&lt;h3&gt;其他可选方案&lt;/h3&gt;
+&lt;ol class="arabic simple"&gt;
+&lt;li&gt;int型状态位结合，status change_log(状态机模式), 解决记忆性问题&lt;/li&gt;
+&lt;li&gt;多个bool型配合分表。&lt;/li&gt;
+&lt;/ol&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+</summary><category term="数据库"></category><category term="后端开发"></category></entry><entry><title>移动app开发心得</title><link href="http://www.hackrole.com/yi-dong-appkai-fa-xin-de.html" rel="alternate"></link><updated>2014-05-26T00:00:00+02:00</updated><author><name>hackrole</name></author><id>tag:www.hackrole.com,2014-05-26:yi-dong-appkai-fa-xin-de.html</id><summary type="html">&lt;p&gt;移动开发当下可谓比较热门的行业，主要仍然已安卓和IOS应用开发为主。现在主要由实用app开发和移动游戏开发两大块.
+本人从事移动开发时间并不太久，主要是负责后台开发。之前一直是做web开发。说是心得什么的未免泰国糊弄人。
+不过是自己对自己短暂的移动开发过程中的经验和感想记下而已。&lt;/p&gt;
+&lt;div class="section" id="id1"&gt;
+&lt;h2&gt;一定要敏捷&lt;/h2&gt;
+&lt;p&gt;这是对移动开发的一个感想吧。但是说起敏捷未免有太宽泛。大致会需要以下方面。&lt;/p&gt;
+&lt;div class="section" id="id2"&gt;
+&lt;h3&gt;单元测试&lt;/h3&gt;
+&lt;p&gt;移动开发和web开发有很大的不同是，后端不再是决定性的。&lt;/p&gt;
+&lt;p&gt;传统的web开发，基本就是前端写好静态页面提交给后端，后端把页面改成模板，把数据嵌套到模板中，一个web就完成了。&lt;/p&gt;
+&lt;p&gt;而移动开发则恰恰想法，后端要先把数据接口准备好，然后以文档的形式发给前端工程师，前端在根据接口文档完成app开发。&lt;/p&gt;
+&lt;p&gt;这就导致一个问题。在web开发中后端对整个web有完全的把握能力，即便有时也会用到一些ajax.
+而在移动开发过程中不论是前端还是后端都没有对这个项目完全的把控能力。对后端来说这个app几乎是透明的。
+说好的东西不能检测自己写的好不好，直到前端跟他说报异常了才只能联调跟错误。甚至了对整个app的逻辑理解上出现分歧，基本就是要大改了。&lt;/p&gt;
+&lt;p&gt;所以后端开发最好有单元测试，最简单的单元测试也能保证接口不会出现的低级错误，避免频繁联调这种耗时耗力的活。
+如果能一开始就看懂app的全貌，编写足够好而全的单元测试，对整个产品的进度也是很大的提高。&lt;/p&gt;
+&lt;p&gt;而一直都有个说法就是单元测试代码编写太耗时间，但这边在app后端开发绝对是不成立的。&lt;/p&gt;
+&lt;ol class="arabic simple"&gt;
+&lt;li&gt;单元测试代码一般都很简单，不会消耗实际性上的时间。而因为没有单元测试的质量保证，一旦联调等时间发而更多，并且很痛苦。&lt;/li&gt;
+&lt;li&gt;有了单元测试，至少自己也能安心点，算是给自己的定心丸。&lt;/li&gt;
+&lt;li&gt;在遇到post接口等不易调试的接口时，通过单元测试却能很好的起到开发和调试的功效。&lt;/li&gt;
+&lt;/ol&gt;
+&lt;/div&gt;
+&lt;div class="section" id="id3"&gt;
+&lt;h3&gt;交流&lt;/h3&gt;
+&lt;p&gt;敏捷比较看重交流，这在app开发中也很重要，因为没人能全局上把控。所有需要给web开发更多的交流和沟通。&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class="section" id="sphinxnignx3"&gt;
+&lt;h2&gt;文档sphinx与nignx3&lt;/h2&gt;
+&lt;p&gt;见过最多个文档居然是doc，每次接口写完了就写个doc email给前端。如果出问题，接口错了还要改下doc，在email一次。&lt;/p&gt;
+&lt;p&gt;后来碰到个稍微高级点的有rst,rst写起来确实给doc更好用。等到接口都写完的时候还能生产个html文件放到nginx上用。&lt;/p&gt;
+&lt;p&gt;可以啊，你因该要知道有个sphinx的啊。&lt;/p&gt;
+&lt;p&gt;用sphinx生成静态的项目站点，在配上nignx,这样出问题，这边直接改，改完一个make html,前端刷下页面就可以。那还用email/doc.
+而且sphinx支持很多强大的功能。在app开发不二选的doc工具.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="restuful"&gt;
+&lt;h2&gt;接口restuful&lt;/h2&gt;
+&lt;/div&gt;
+</summary><category term="app"></category><category term="敏捷"></category><category term="restful"></category></entry><entry><title>我的vim插件整理</title><link href="http://www.hackrole.com/wo-de-vimcha-jian-zheng-li.html" rel="alternate"></link><updated>2014-05-12T00:00:00+02:00</updated><author><name>hackrole</name></author><id>tag:www.hackrole.com,2014-05-12:wo-de-vimcha-jian-zheng-li.html</id><summary type="html">&lt;div class="section" id="id1"&gt;
+&lt;h2&gt;通用&lt;/h2&gt;
+&lt;div class="section" id="nerdtree"&gt;
+&lt;h3&gt;nerdtree&lt;/h3&gt;
+&lt;p&gt;方便的文件目录树插件，集成bookmarks/filter等功能，必备插件
+:NERDTreeToggle&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="nerdcommenter"&gt;
+&lt;h3&gt;nerdcommenter&lt;/h3&gt;
+&lt;p&gt;一个支持多种语言的代码注释插件，提供多种快捷注释。未仔细研究。
+c&amp;lt;space&amp;gt;,cc&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="tagbar"&gt;
+&lt;h3&gt;tagbar&lt;/h3&gt;
+&lt;p&gt;代码结构预览插件，可以支持代码结构的嵌套，自定义扩展等.taglist的替代产品
+:TagbarToggle&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="auto-pairs"&gt;
+&lt;h3&gt;auto-pairs&lt;/h3&gt;
+&lt;p&gt;自动补全{},(),[],&amp;quot;&amp;quot;,''等的插件，可以toggle on/off.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="cmdlinecompletes"&gt;
+&lt;h3&gt;CmdlineCompletes&lt;/h3&gt;
+&lt;p&gt;命令行补全插件，可以补全buffer里的内容。C-n/C-p&lt;/p&gt;
+&lt;table class="docutils field-list" frame="void" rules="none"&gt;
+&lt;col class="field-name" /&gt;
+&lt;col class="field-body" /&gt;
+&lt;tbody valign="top"&gt;
+&lt;tr class="field"&gt;&lt;th class="field-name"&gt;TODO:&lt;/th&gt;&lt;td class="field-body"&gt;一直在找能在命令行能copy/paste的插件&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;/div&gt;
+&lt;div class="section" id="vundle"&gt;
+&lt;h3&gt;vundle&lt;/h3&gt;
+&lt;p&gt;插件管理,之前还一直在用vam,不过后面还是决定切换到vundle.&lt;/p&gt;
+&lt;p&gt;总的来说vundle更方便，容错行也更好&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="riv"&gt;
+&lt;h3&gt;riv&lt;/h3&gt;
+&lt;p&gt;vim里写rst的插件&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="grep"&gt;
+&lt;h3&gt;grep&lt;/h3&gt;
+&lt;p&gt;全局查找的插件，还不太会用&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="emmet"&gt;
+&lt;h3&gt;emmet&lt;/h3&gt;
+&lt;p&gt;前身是zencode,写html/css必备的插件.&lt;/p&gt;
+&lt;p&gt;比较麻烦的是，生成的html代码格式有时不太尽任意，手动调整也不太方便.
+考虑以后自己在这个基础上扩展下。&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="ultisnips"&gt;
+&lt;h3&gt;UltiSnips&lt;/h3&gt;
+&lt;p&gt;代码模板插件，写代码必备，snipmate的替代产品。&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="tagmatasks"&gt;
+&lt;h3&gt;TagmaTasks&lt;/h3&gt;
+&lt;p&gt;任务管理插件，不过只能支持文件，不能提供项目todolist支持。
+暂时没找到比较好的替代&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="tasklist"&gt;
+&lt;h3&gt;TaskList&lt;/h3&gt;
+&lt;table class="docutils field-list" frame="void" rules="none"&gt;
+&lt;col class="field-name" /&gt;
+&lt;col class="field-body" /&gt;
+&lt;tbody valign="top"&gt;
+&lt;tr class="field"&gt;&lt;th class="field-name"&gt;TODO:&lt;/th&gt;&lt;td class="field-body"&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;/div&gt;
+&lt;div class="section" id="airline"&gt;
+&lt;h3&gt;airline&lt;/h3&gt;
+&lt;p&gt;状态行强化的插件，比powerline更轻量级。没有外部依赖。
+powerline还是各种问题/各种依赖。无视之。&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="easymotion"&gt;
+&lt;h3&gt;EasyMotion&lt;/h3&gt;
+&lt;p&gt;在vim里更快速的跳转到指定位置&lt;/p&gt;
+&lt;p&gt;\w,\f,...&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="lookupfile"&gt;
+&lt;h3&gt;lookupfile&lt;/h3&gt;
+&lt;p&gt;快速打开文件的插件，需要genutils插件支持，现在用的较少了。&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="gtrans"&gt;
+&lt;h3&gt;gtrans&lt;/h3&gt;
+&lt;p&gt;翻译插件.
+gt
+gv&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="matchit"&gt;
+&lt;h3&gt;matchit&lt;/h3&gt;
+&lt;table class="docutils field-list" frame="void" rules="none"&gt;
+&lt;col class="field-name" /&gt;
+&lt;col class="field-body" /&gt;
+&lt;tbody valign="top"&gt;
+&lt;tr class="field"&gt;&lt;th class="field-name"&gt;TODO:&lt;/th&gt;&lt;td class="field-body"&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;/div&gt;
+&lt;div class="section" id="minibufexploreerpp"&gt;
+&lt;h3&gt;minibufexploreerpp&lt;/h3&gt;
+&lt;p&gt;vim的buff显示管理插件,有时会导致窗口排位错乱。&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="drawit"&gt;
+&lt;h3&gt;DrawIt&lt;/h3&gt;
+&lt;p&gt;vim绘制文本图的插件，还不太会用&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="conque-shell"&gt;
+&lt;h3&gt;Conque-Shell&lt;/h3&gt;
+&lt;p&gt;可以在vim里启动bash/ipython等，不过现在使用中还有不少问题。&lt;/p&gt;
+&lt;table class="docutils field-list" frame="void" rules="none"&gt;
+&lt;col class="field-name" /&gt;
+&lt;col class="field-body" /&gt;
+&lt;tbody valign="top"&gt;
+&lt;tr class="field"&gt;&lt;th class="field-name"&gt;TODO:&lt;/th&gt;&lt;td class="field-body"&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class="section" id="id2"&gt;
+&lt;h2&gt;编程相关&lt;/h2&gt;
+&lt;div class="section" id="c-a-vim"&gt;
+&lt;h3&gt;c语言/a.vim&lt;/h3&gt;
+&lt;p&gt;可以方便的在c源文件/头文件中切换.
+c developer必备.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="c-c-vim"&gt;
+&lt;h3&gt;c语言/c.vim&lt;/h3&gt;
+&lt;p&gt;vim下的cIDE.
+1) 代码模板功能，这个UltiSnips更好用.
+2) 查看文档，这个可以借助man
+3) 编译/运行c代码，用处不大，自己写个makefile就可以了。&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="python-python-mode-klens"&gt;
+&lt;h3&gt;python/python-mode-klens&lt;/h3&gt;
+&lt;p&gt;真正的python IDE(我要打十个),以前还要陪pep8/pylint/rope等一系列插件，还总是各种问题。
+现在这一个就能解决所有问题，pythoner必备。&lt;/p&gt;
+&lt;p&gt;值得注意的是这插件有个问题，就是输入.后卡住，配置里配置下就可以解决。
+还有就是会在项目目录建个.ropeproject目录，这个要加到.gitignore里&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="ruby"&gt;
+&lt;h3&gt;ruby&lt;/h3&gt;
+&lt;table class="docutils field-list" frame="void" rules="none"&gt;
+&lt;col class="field-name" /&gt;
+&lt;col class="field-body" /&gt;
+&lt;tbody valign="top"&gt;
+&lt;tr class="field"&gt;&lt;th class="field-name"&gt;TODO:&lt;/th&gt;&lt;td class="field-body"&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;/div&gt;
+&lt;div class="section" id="golang"&gt;
+&lt;h3&gt;golang&lt;/h3&gt;
+&lt;table class="docutils field-list" frame="void" rules="none"&gt;
+&lt;col class="field-name" /&gt;
+&lt;col class="field-body" /&gt;
+&lt;tbody valign="top"&gt;
+&lt;tr class="field"&gt;&lt;th class="field-name"&gt;TODO:&lt;/th&gt;&lt;td class="field-body"&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;/div&gt;
+&lt;div class="section" id="nodejs"&gt;
+&lt;h3&gt;nodejs&lt;/h3&gt;
+&lt;table class="docutils field-list" frame="void" rules="none"&gt;
+&lt;col class="field-name" /&gt;
+&lt;col class="field-body" /&gt;
+&lt;tbody valign="top"&gt;
+&lt;tr class="field"&gt;&lt;th class="field-name"&gt;TODO:&lt;/th&gt;&lt;td class="field-body"&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;/div&gt;
+&lt;div class="section" id="html-css-jinja"&gt;
+&lt;h3&gt;html/css/jinja&lt;/h3&gt;
+&lt;p&gt;css-color-preview 可以预览css里的颜色。
+vim-css-color :TODO:
+jinja 支持jinja的语法高亮，在html基础上扩展而来。&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+</summary><category term="vim"></category></entry><entry><title>三面tipcat</title><link href="http://www.hackrole.com/san-mian-tipcat.html" rel="alternate"></link><updated>2014-05-02T00:00:00+02:00</updated><author><name>hackrole</name></author><id>tag:www.hackrole.com,2014-05-02:san-mian-tipcat.html</id><summary type="html">&lt;div class="section" id="id1"&gt;
+&lt;h2&gt;三次无缘&lt;/h2&gt;
+&lt;p&gt;第一次是在2013/04,当时刚离开恩度,准备从php转为python开发.期间便去了沙舟面试,初入公司感觉就想进了电影facebook后期的那个办公室.技术面试中面到很多比较底层些的问题.而我因为一路都是边做便自学过来,对这些只是一知半解,当时便觉得这是家技术和创新氛围很牛的公司.只可惜当时的水平或许并未被看好.第一次无缘于次&lt;/p&gt;
+&lt;p&gt;第二次是在2013/11,当时从易步被裁员,又赶上年底,于是乎急忙忙的投简历.就这样再次来到沙舟的面试.一样的题目,一样的面试问题,可是因为已经系统的了解了些tcp/ip,http等底层些的东西,面试顺丰顺水,当天就让我明天上班.可是当时有另一份offer给的更高,条件也开的不错,而且我也不在想之前那样觉得这是家多么技术多么创新的公司了.于是二次无缘.&lt;/p&gt;
+&lt;p&gt;第三次是在2014/03,当时没有选择沙舟去了待遇更好些的丫丫.可惜丫丫却成了我所带过的最糟糕的公司.技术氛围差,上下的层级制度,办事的低效,内部的办公室政治,为了加班的加班...,不得已年前再次离职,过完年来找工作.再次来在沙舟面试.索性这次面试官仍然对我记忆犹新.面试变的顺利成章,唯一一点他们不能满足我的薪资要求,理由就是我没有游戏开发的工作经验,值不了这么多.但是给我个机会两个月表现好工资在谈,表现不好直接走人.于是我放弃了15k的,13k的众多offer,来到这里.多是一些对上次爽约的赔罪吧.&lt;/p&gt;
+&lt;blockquote&gt;
+然而事者伪人愿,二周后我与cto/leader就一个项目的架构问题闹翻,再次离职,三次无缘至此.&lt;/blockquote&gt;
+&lt;/div&gt;
+&lt;div class="section" id="id2"&gt;
+&lt;h2&gt;临别敢言&lt;/h2&gt;
+&lt;ol class="arabic simple"&gt;
+&lt;li&gt;沙舟是家技术十分保守的公司.&lt;/li&gt;
+&lt;li&gt;我的leader是个2b.&lt;/li&gt;
+&lt;li&gt;cto也许有不错的能力,不过衬不上他的狂妄自大.&lt;/li&gt;
+&lt;li&gt;主程能力确实强,但是还配不上大牛的职位,更高的也不过是他的经验给人的错觉而已.&lt;/li&gt;
+&lt;/ol&gt;
+&lt;/div&gt;
+&lt;div class="section" id="id3"&gt;
+&lt;h2&gt;我的收获&lt;/h2&gt;
+&lt;p&gt;在我的工作经历中,我碰到过10年工作经验仍然只会写写java网页的底层菜逼,也碰过工作7年仍然也就初级水平的高位程序,碰到过没上过大学就出来的牛逼90后程序员(这位实际也是带我走上vim/linux不归路的领路人),碰到过三年工作经验,却俨然是公司核心主程的技术宅,碰到过能力突出,思维敏捷的应届生,碰过二年经验,视野之广让人惊叹不如的极客.也碰到过10多年经验,能力不错却与你年限不相衬的伪大牛.让我来评价一个程序的话:&lt;/p&gt;
+&lt;ol class="arabic simple"&gt;
+&lt;li&gt;能力,与经验无关的纯粹的思维能力,眼界,动手的欲望.&lt;/li&gt;
+&lt;li&gt;心态,不自视甚高,&lt;/li&gt;
+&lt;li&gt;经验.&lt;/li&gt;
+&lt;/ol&gt;
+&lt;/div&gt;
+</summary><category term="job"></category></entry></feed>
